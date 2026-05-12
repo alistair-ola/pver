@@ -116,6 +116,30 @@ jobs:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
+### Releasing to Protected Branches
+
+When `main` is protected, the default `GITHUB_TOKEN` usually cannot push version
+bumps unless your branch protection allows the workflow to bypass the rule. For
+protected-branch release workflows, create a fine-grained token or GitHub App
+token that is allowed to push to `main`, save it as `PVER_GITHUB_TOKEN`, and keep
+using `GITHUB_TOKEN` for the rest of the workflow.
+
+```yml
+permissions:
+  contents: write
+
+steps:
+  - uses: actions/checkout@v3
+  - run: pver release --git --package-json --readme
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PVER_GITHUB_TOKEN: ${{ secrets.PVER_GITHUB_TOKEN }}
+```
+
+`PVER_GITHUB_TOKEN` is only used when pver rewrites the `origin` remote for git
+pushes. If it is not set, pver falls back to the existing `GITHUB_TOKEN`
+behavior.
+
 ## Analysis
 
 Analysis has two steps. Getting the `current_version` and using the `transition_method` to
